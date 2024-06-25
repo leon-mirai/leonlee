@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celestial Bodies Animation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: black;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // planet diameter and moon diameters - YOU CAN CHANGE THESE VALUES TO CHANGE CELESTIAL BODY SIZES
+        const PLANET_D = 150;
+        const MOON_D = PLANET_D / 2;
+        const RED_MOON_D = MOON_D / 8;
+
+        // orbit radii (x and y) for each moon // CHANGE THESE VALUES FOR ORBIT TRAJECTORY
+        let yellow_radius_x = 400;
+        let yellow_radius_y = 125;
+        let white_radius_x = 150;
+        let white_radius_y = 400;
+        let red_radius_x = 65;
+        let red_radius_y = 65;
+
+        // moon angle. CHANGE ANGLES TO CHANGE INITIAL POSITION OF MOONS ON ORBITAL TRACK
+        let yellowAngle = 0;
+        let whiteAngle = 0;
+        let redAngle = 0;
+
+        // start and end angles for planet's bright/dark sides -- basically semi circles.
+        let brightStartAngle = 0;
+        let brightEndAngle = 180;
+        let darkStartAngle = 180;
+        let darkEndAngle = 360;
+
+        function setup() {
+            createCanvas(1000, 1000); // width = 500, height = 500
+            angleMode(DEGREES);
+            ellipseMode(CENTER);
+            frameRate(1000);
+            //noLoop()
+        }
+
+        function draw() {
+            background(0);
+            noStroke();
+
+            // CHANGE THESE VALUES TO CHANGE ORBITAL SPEED !!!
+            yellowAngle += 1;
+            whiteAngle -= 0.5;
+            redAngle += 5;
+
+            // calculates center coordinates of the planet
+            let centerX = width / 2;
+            let centerY = height / 2;
+
+            // calculate yellow moon's position relative to center
+            let yellowX = centerX + yellow_radius_x * cos(yellowAngle);
+            let yellowY = centerY + yellow_radius_y * sin(yellowAngle);
+
+            // finds difference of x and y pos of moon and planet.
+            let deltaX = yellowX - centerX;
+            let deltaY = yellowY - centerY;
+
+            // calculate angle from center to yellow moon -- hence allows it to track and face where the yellow moon is
+            let angletomoon = atan2(deltaY, deltaX);
+
+            // calculates angles for the bright and dark sides based on the angle to the moon
+            brightStartAngle = angletomoon - 90; // -90 and + 90 is used to maintain the 180 degrees of semi circle when it spins
+            brightEndAngle = angletomoon + 90;
+            darkStartAngle = angletomoon + 90;
+            darkEndAngle = angletomoon - 90;
+
+            // bright/dark side of the moon
+            fill("lightgrey");
+            arc(centerX, centerY, PLANET_D, PLANET_D, brightStartAngle, brightEndAngle);
+            fill("darkgrey");
+            arc(centerX, centerY, PLANET_D, PLANET_D, darkStartAngle, darkEndAngle);
+
+            // calculates positions of all moons
+            let x_1 = yellow_radius_x * cos(yellowAngle); // yellow_moon_radius * cos(yellow_angle_x) from -1 to 1 to determine x-angular position
+            let y_1 = yellow_radius_y * sin(yellowAngle);
+            let x_2 = white_radius_x * cos(whiteAngle);
+            let y_2 = white_radius_y * sin(whiteAngle);
+            let x_3 = red_radius_x * cos(redAngle);
+            let y_3 = red_radius_y * sin(redAngle);
+
+            // draws yellow moon, orbit, distance to planet
+            fill("yellow");
+            ellipse(centerX + x_1, centerY + y_1, MOON_D, MOON_D); // draw moon: origin + 400 * cos(yellowAngle)
+            noFill(); // makes ellipses empty to create orbital track
+            stroke("yellow"); // colours the orbital track yellow and planet
+            ellipse(centerX, centerY, 2 * yellow_radius_x, 2 * yellow_radius_y); // orbit: multiply by 2 to get diameter to fit parameter
+            let yellow_dist = dist(centerX, centerY, x_1 + centerX, y_1 + centerY);
+
+            // draw white moon, orbit, distance to planet
+            fill("white");
+            noStroke();
+            ellipse(centerX + x_2, centerY + y_2, MOON_D, MOON_D);
+            noFill();
+            stroke("white");
+            ellipse(width / 2, height / 2, 2 * white_radius_x, 2 * white_radius_y);
+            let white_dist = dist(centerX, centerY, x_2 + centerX, y_2 + centerY);
+
+            // draw red moon, orbit, distance to white moon
+            fill("red");
+            ellipse(centerX + x_2 + x_3, centerX + y_2 + y_3, RED_MOON_D, RED_MOON_D); // translation on x-axis: origin + white_pos + red_pos
+            noFill();
+            stroke("red");
+            ellipse(centerX + x_2, centerX + y_2, 2 * red_radius_x, 2 * red_radius_y);
+
+            // inner-most moon colour tracker -> colour changes based on closest moon
+            if (yellow_dist < white_dist) {
+                fill("yellow");
+            } else {
+                fill("white");
+            }
+            noStroke();
+            ellipse(centerX, centerY, 50);
+        }
+    </script>
+</body>
+</html>

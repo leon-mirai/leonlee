@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celestial Bodies Animation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: black;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const WIDTH = 2000;
+        const HEIGHT = 500;
+        const DIAMETER = 100;
+        const RADIUS = DIAMETER / 2;
+        const IMG_X = 100;
+        const IMG_Y = 100;
+
+        let trace;
+
+        // amplitude
+        let a1;
+        let a2;
+        let a3;
+        let a4;
+
+        // frequency
+        let f1;
+        let f2;
+        let f3;
+        let f4;
+
+        // phase
+        let p1;
+        let p2;
+        let p3;
+        let p4;
+
+        // damping
+        let d1;
+        let d2;
+        let d3;
+        let d4;
+
+        let h = 50; 
+        let k = 50; 
+
+        let listX = [];
+        let listY = [];
+
+        let size = 25;
+
+
+        let posx = WIDTH / 2;
+        let posy = HEIGHT / 2;
+        let speedX = 10;
+        let speedY = 7;
+
+        function setup() { 
+        createCanvas(windowWidth, windowHeight);
+        trace = [];
+        sulphurYellow = color('#EFE8C0'); 
+        pyriteYellow = color('#c4bf33')
+        paleKingsBlue = color('#B8D0DD'); 
+        calamineBlue = color('#80ffcc'); 
+        vinaceousCinnamon = color('#f59994');
+        background(paleKingsBlue);
+        stroke(vinaceousCinnamon);
+        strokeWeight(3);
+        for (x = 0; x < width; x += size + 0) {
+            for (y = 0; y < height; y += size + 0) {
+            c = random(0, 4);
+            if (c < 1) {
+                line(x, y, x + size, y + size); // left diagonal
+            } else if (c < 2) {
+                line(x, y + size, x + size, y); // right diagonal
+            } else if (c < 3) {
+                //line(x, y, x, y + size); // vertical line
+            } else if (c < 4) {
+                //line(x, y, x + size, y); // horizontal line
+            }
+            }
+        }
+        // amplitude how large the peaks are
+        a1 = 100;
+        a2 = 100;
+        a3 = 150;
+        a4 = 100;
+        // frequency how long it takes to finish an entire cycle
+        f1 = 2;
+        f2 = 6;
+        f3 = 1.01;
+        f4 = 3;
+        // phase closer it is to 0, the more it is straight. closer to 90 degrees, closer to circle pattern
+        p1 = PI / 16; 
+        p2 = 3 * PI / 2;
+        p3 = PI / 16;
+        p4 = PI;
+        // damping how quickly the pattern diminishes over time
+        d1 = 0;
+        d2 = 0;
+        d3 = 0;
+        d4 = 0;
+        }
+        function draw() { 
+        stroke(sulphurYellow);
+        fill(vinaceousCinnamon);
+        strokeWeight(1);
+
+        let t = (millis() / 1000); 
+            translate(width / 2, height / 2);
+        rotate(HALF_PI);
+        trace.push({
+            x: (a1 * sin(t * f1 + p1) * exp(-d1 * t)) + (a2 * sin(t * f2 + p2) * exp(-d2 * t)), // uses euler's exponential e
+            y: (a3 * sin(t * f3 + p3) * exp(-d3 * t)) + (a4 * sin(t * f4 + p4) * exp(-d4 * t)),
+        })
+        drawVertices(trace);
+        
+        wavefyX(600, 700);
+        wavefyY(-400, -250);
+
+        rotate(PI + HALF_PI );
+        stroke(paleKingsBlue);
+        make_text(-width / 2 + 980, -height / 3 - 15, 75, "   Creative Coding   ");
+        rotate(PI + HALF_PI);
+        make_text(-width / 2 + 980, -height / 3 - 350, 50, "Making Magic In p5.js");
+        }
+
+        function drawVertices(vertices) {
+        noFill();
+        beginShape();
+        for (var i = 0; i < vertices.length; i++) {
+            vertex(vertices[i].x, vertices[i].y); 
+        }
+        endShape();
+        }
+
+        function make_text(x, y, size, string) {
+            textAlign(CENTER, CENTER);
+            // Title and
+            textSize(size);
+            
+            textFont("Courier New");
+            let title = string;
+            
+            fill("black");
+            text(title, x, y);
+        }
+
+        function wavefyX(rectY, baseY) {  // generates vertical wave by calling pointGenX for vertical list of points for wave
+            stroke(sulphurYellow);
+            strokeWeight(8);
+            let interval = 0;
+            while (interval < baseY - rectY) {
+                interval += 10;
+                pointGeneratorX(rectY + interval, -width / 5, width / 5) ;
+                plotter(listX, listY);
+            }
+        }
+
+        function wavefyY(rectX, baseX) { // generates horizontal wave by calling pointGenY for horizontal list of points for wave
+            stroke(sulphurYellow);
+            let interval = 0;
+            while (interval < baseX - rectX) {
+                interval += 10;
+                pointGeneratorY(rectX + interval, -height / 2, height / 2) ;
+                plotter(listX, listY);
+            } 
+        }
+
+        function pointGeneratorX(yPos, xLow, xHigh) { // generates list of points that define wave shape. Calculates x, y position for each point in list X, y
+            x = xLow; // yPos, xLow, xHigh all determine the range the points will increment and by how much
+            listX = [];
+            listY = [];
+            while (x < xHigh) {
+                a = random(1, 10);
+                x_coord = x;
+                y_coord = a * sin(x - h) + yPos;
+                listX.push(x_coord);
+                listY.push(y_coord);
+                x += 30;
+            }
+        }
+
+        function pointGeneratorY(xPos, yLow, yHigh) {
+            y = yLow;
+            listX = [];
+            listY = [];
+            while (y < yHigh) {
+                a = random(1, 10);
+                y_coord = y;
+                x_coord = a * sin(y - h) + xPos;
+                listX.push(x_coord);
+                listY.push(y_coord);
+                y += 40;
+            }
+        }
+        
+        function plotter(listX, listY) { // draws the actual shape, accesses points then plots it
+            let counter = 0; // tracks current position within lists of points in listX and listY
+            noFill();
+            beginShape();
+            while (counter < listX.length) { 
+            tempX = listX[counter];
+            tempY = listY[counter];
+            curveVertex(tempX, tempY);
+            counter++;
+            }
+            endShape();
+        }
+    </script>
+</body>
+</html>
